@@ -679,6 +679,10 @@ class Fixtures:
         )
         self.check(b"192.0.2.50" not in checked.stdout and b"192.0.2.1" not in checked.stdout, "check omits values")
         self.check(b"no UniFi plugin settings remain" not in checked.stdout, "no shared-key notice while keys remain")
+        # Project settings without an env block must not crash the check.
+        legacy_path.write_text(json.dumps({"permissions": {"allow": []}}), encoding="utf-8")
+        run(wrapper("check-prereqs"))
+        legacy_path.write_bytes(legacy_bytes)
         hook = scripts / "claude-session-check.sh"
         if os.name != "nt":
             notice = subprocess.run(

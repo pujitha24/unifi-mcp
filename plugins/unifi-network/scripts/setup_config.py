@@ -672,7 +672,9 @@ def claude_main(args, root, name, product):
         merge_env(saved, {}, product, inherited)
         if notice:
             print(notice)
-        others_left = [k for k in legacy_data["env"] if k.startswith(other_prefixes(product))] if legacy_data else []
+        others_left = (
+            [k for k in legacy_data.get("env", {}) if k.startswith(other_prefixes(product))] if legacy_data else []
+        )
         if shared and not owned and not others_left:
             print(
                 "Notice: no UniFi plugin settings remain in .claude/settings.local.json, but it still holds shared "
@@ -770,10 +772,10 @@ def claude_main(args, root, name, product):
         # We verify only this installation's options. Other products (including
         # older plugins or standalone servers) can use shared fallbacks without
         # leaving scoped keys here, so absence of those keys proves nothing.
-        others_left = sorted(k for k in legacy_data["env"] if k.startswith(other_prefixes(product)))
+        others_left = sorted(k for k in legacy_data.get("env", {}) if k.startswith(other_prefixes(product)))
         removed = set(owned)
         remaining = dict(legacy_data)
-        remaining["env"] = {k: v for k, v in legacy_data["env"].items() if k not in removed}
+        remaining["env"] = {k: v for k, v in legacy_data.get("env", {}).items() if k not in removed}
         original = legacy_path.read_bytes()
     if claude_saved(plugin_id, environment, mapping, schema) != saved:
         refuse("The plugin's options changed during setup; rerun against the latest options.")
